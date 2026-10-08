@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS servico_vapt_vupt (
+    id BIGSERIAL PRIMARY KEY,
+    codigo UUID NOT NULL UNIQUE,
+    data_cadastro TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    data_ultima_atualizacao TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    descricao VARCHAR(255) NOT NULL UNIQUE,
+    id_origem BIGINT NULL,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE
+);
+

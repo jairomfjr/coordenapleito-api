@@ -1,0 +1,5 @@
+ALTER TABLE public.usuario
+    ADD COLUMN IF NOT EXISTS celular VARCHAR(255);
+
+ALTER TABLE public.cidadao
+    ADD COLUMN IF NOT EXISTS celular VARCHAR(255);

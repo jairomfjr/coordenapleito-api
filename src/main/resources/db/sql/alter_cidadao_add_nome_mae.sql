@@ -1,0 +1,2 @@
+ALTER TABLE public.cidadao
+    ADD COLUMN IF NOT EXISTS nome_mae VARCHAR(255) NULL;

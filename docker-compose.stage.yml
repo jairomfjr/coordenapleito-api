@@ -1,0 +1,12 @@
+services:
+  coordenapleito-api:
+    build: .
+    container_name: coordenapleito-api-stage
+    network_mode: net_sps
+    ports:
+      - :8080
+    restart: always
+    image: hub.sps.ce.gov.br/coordenapleito/coordenapleito-api:stage
+    environment:
+      SPRING_PROFILES_ACTIVE: stage
+      APP_INTEGRACAO_VAPT_VUPT_WEBHOOK_TOKEN: 364c98e3938417f45287985b126ca0c947c1163ce34842a0248dff645c9dedcf
