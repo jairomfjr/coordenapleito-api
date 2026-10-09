@@ -1,5 +1,5 @@
 services:
-  app:
+  coordenapleito-api:
     build:
       context: .
       dockerfile: Dockerfile
