@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -68,17 +70,43 @@ public class CadastroUsuarioService {
             throw new NegocioException("Já existe um usuário cadastrado com esse CPF");
         }
 
+        String senhaAleatoria = null;
         if (usuarioExiste.isEmpty()) {
-
-            String senhaAleatoria = GerarSenhaRandom.gerarSenhaAleatoria();
+            senhaAleatoria = GerarSenhaRandom.gerarSenhaAleatoria();
             usuario.setSenha(passwordEncoder.encode(senhaAleatoria));
-
-            envioEmailService.enviar(EnvioEmailService.Mensagem.builder().assunto("Cadastro de usuário").corpo("usuario-cadastrado.html")
-                    .variavel("usuario", usuario).variavel("senha", senhaAleatoria)
-                    .destinatario(usuario.getContato().getEmail()).build());
         }
 
-        return usuarioRepository.save(usuario);
+        Usuario salvo = usuarioRepository.save(usuario);
+        if (senhaAleatoria != null) {
+            agendarEmailDeCadastro(salvo, senhaAleatoria);
+        }
+        return salvo;
+    }
+
+    /**
+     * O SMTP não participa da transação. O e-mail só pode sair depois do commit,
+     * para não confirmar um cadastro que o banco desfez.
+     */
+    private void agendarEmailDeCadastro(Usuario usuario, String senhaAleatoria) {
+        EnvioEmailService.Mensagem mensagem = EnvioEmailService.Mensagem.builder()
+                .assunto("Cadastro de usuário")
+                .corpo("usuario-cadastrado.html")
+                .variavel("usuario", usuario)
+                .variavel("senha", senhaAleatoria)
+                .destinatario(usuario.getContato().getEmail())
+                .build();
+
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            envioEmailService.enviar(mensagem);
+            return;
+        }
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                envioEmailService.enviar(mensagem);
+            }
+        });
     }
 
 }
