@@ -4,5 +4,5 @@ COPY . /app
 WORKDIR /app
 
 RUN mvn clean install -DskipTests
-EXPOSE 8083
+EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "/app/target/coordenapleito-api-0.0.1.jar"]

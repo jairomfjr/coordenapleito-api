@@ -1,14 +1,23 @@
 services:
-  coordenapleito-api:
-    build: .
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: coordenapleito-api
-    network_mode: net_sps
-    ports:
-      - "8083:8083"
-    restart: always
-    image: hub.sps.ce.gov.br/coordenapleito/coordenapleito-api
     environment:
       SPRING_PROFILES_ACTIVE: production
-      SERVER_PORT: 8083
-      APP_FRONTEND_BASE_URL: ${APP_FRONTEND_BASE_URL:-https://coordenapleito.sps.ce.gov.br}
-      APP_INTEGRACAO_VAPT_VUPT_WEBHOOK_TOKEN: 364c98e3938417f45287985b126ca0c947c1163ce34842a0248dff645c9dedcf
+      SERVER_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://181.215.134.218:5432/coordenapleitodb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: "@Systemcode236"
+      APP_FRONTEND_BASE_URL: https://coordenapleito.sps.ce.gov.br
+      APP_CORS_ALLOWED_ORIGINS: https://coordenapleito.sps.ce.gov.br,http://coordenapleito.sps.ce.gov.br,http://181.215.134.218:3005,http://181.215.134.218
+    ports:
+      - "8083:8080"
+    networks:
+      - coordenapleito-network
+    restart: unless-stopped
+
+networks:
+  coordenapleito-network:
+    driver: bridge
