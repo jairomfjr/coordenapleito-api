@@ -26,6 +26,10 @@ public final class PageableUtil {
         return Sort.by(Sort.Order.asc("nome").ignoreCase());
     }
 
+    public static Sort sortLocalVotacaoPadrao() {
+        return Sort.by(Sort.Order.asc("zona"), Sort.Order.asc("localVotacao").ignoreCase());
+    }
+
     public static Sort sortDescricaoAlfabetica() {
         return Sort.by(Sort.Order.asc("descricao").ignoreCase());
     }

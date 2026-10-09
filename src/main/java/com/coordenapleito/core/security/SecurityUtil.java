@@ -22,6 +22,18 @@ public class SecurityUtil {
 		this.usuarioRepositoryProvider = usuarioRepositoryProvider;
 	}
 
+	public boolean temAutoridade(String chave) {
+		if (chave == null || chave.isBlank()) {
+			return false;
+		}
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication == null) {
+			return false;
+		}
+		return authentication.getAuthorities().stream()
+				.anyMatch(granted -> chave.equals(granted.getAuthority()));
+	}
+
 	public Optional<Usuario> getAuthenticatedUser() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 

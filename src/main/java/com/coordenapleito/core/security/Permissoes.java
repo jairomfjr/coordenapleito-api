@@ -404,6 +404,31 @@ public final class Permissoes {
         public static final String VISUALIZAR = "inclusao-social.visualizar";
     }
 
+    public static final class LocalVotacao {
+        private LocalVotacao() {}
+        public static final String RECURSO = "local-votacao";
+        public static final String CRIAR = "local-votacao.criar";
+        public static final String EDITAR = "local-votacao.editar";
+        public static final String EXCLUIR = "local-votacao.excluir";
+        public static final String LISTAR = "local-votacao.listar";
+        public static final String MENU = "local-votacao.menu";
+        public static final String PAGINA = "local-votacao.pagina";
+        public static final String VISUALIZAR = "local-votacao.visualizar";
+        public static final String BLOQUEAR_CAMPOS = "local-votacao.bloquear-campos";
+    }
+
+    public static final class Coordenador {
+        private Coordenador() {}
+        public static final String RECURSO = "coordenador";
+        public static final String CRIAR = "coordenador.criar";
+        public static final String EDITAR = "coordenador.editar";
+        public static final String EXCLUIR = "coordenador.excluir";
+        public static final String LISTAR = "coordenador.listar";
+        public static final String MENU = "coordenador.menu";
+        public static final String PAGINA = "coordenador.pagina";
+        public static final String VISUALIZAR = "coordenador.visualizar";
+    }
+
     public static final class MapaInterativo {
         private MapaInterativo() {}
         public static final String RECURSO = "mapa-interativo";

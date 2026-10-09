@@ -34,6 +34,18 @@ public final class PermissionCatalogRegistry {
         order += 10;
         readOnlyUi(list, "administracao", "permissao", "Permissões", order);
         order += 20;
+        crudUi(list, "pleito", "local-votacao", "Locais de votação", order);
+        order += 20;
+        list.add(def(
+                "local-votacao.bloquear-campos",
+                "pleito",
+                "local-votacao",
+                "bloquear-campos",
+                "Bloquear campos — Locais de votação (exceto coordenadores)",
+                order++));
+        order += 10;
+        crudUi(list, "pleito", "coordenador", "Coordenadores", order);
+        order += 20;
         list.add(def("usuario.alterar-senha", "administracao", "usuario", "alterar-senha", "Alterar senha de usuário", order++));
         list.add(def(
                 "relatorio-dashboard.gerar-qualificacao",
