@@ -73,6 +73,7 @@ public class SecurityConfig {
                                 .requestMatchers("/v3/api-docs/**").permitAll()
                                 .requestMatchers("/swagger-ui/**").permitAll()
                                 .requestMatchers("/swagger-ui.html").permitAll()
+                                .requestMatchers("/ws/**").permitAll()
                                 .anyRequest().authenticated())
                 // Não usar httpBasic(): isso envia WWW-Authenticate: Basic em 401 e o navegador abre
                 // o modal nativo de login ao consumir a API a partir do SPA (Next.js em :3000 → API :8080).

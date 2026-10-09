@@ -24,6 +24,12 @@ public final class NavigationCatalogRegistry {
 
         roots.add(recurso("inicio", "Página inicial", o++));
 
+        roots.add(grupo("pleito", "Pleito", o++, List.of(
+                recurso("local-votacao", "Locais de votação", 0),
+                recurso("coordenador", "Coordenadores", 1))));
+
+        roots.add(recurso("relatorio", "Relatórios", o++));
+
         roots.add(grupo("administracao", "Administração", o++, List.of(
                 recurso("usuario", "Usuários", 0),
                 recurso("grupo", "Grupos", 1),

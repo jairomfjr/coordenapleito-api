@@ -8,6 +8,7 @@ import com.coordenapleito.api.input.CoordenadorInput;
 import com.coordenapleito.api.input.publico.CoordenadorPublicoAtualizaInput;
 import com.coordenapleito.api.input.publico.VerificarTitularidadeInput;
 import com.coordenapleito.domain.exception.NegocioException;
+import com.coordenapleito.infrastructure.service.email.EmailException;
 import com.coordenapleito.domain.model.Coordenador;
 import com.coordenapleito.domain.model.LocalVotacao;
 import com.coordenapleito.domain.repository.CoordenadorRepository;
@@ -17,6 +18,7 @@ import com.coordenapleito.infrastructure.util.CpfUtils;
 import com.coordenapleito.infrastructure.util.CpfValidador;
 import com.coordenapleito.infrastructure.util.PageableUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +35,10 @@ public class PublicCadastroCoordenadorService {
     private final CoordenadorVagasService coordenadorVagasService;
     private final CoordenadorTitularidadeStore titularidadeStore;
     private final EnvioEmailService envioEmailService;
+    private final VinculosCoordenadorEventos vinculosCoordenadorEventos;
+
+    @Value("${app.frontend.base-url:http://localhost:3000}")
+    private String frontendBaseUrl;
 
     @Transactional(readOnly = true)
     public List<LocalVotacaoPublicoModel> listarLocais() {
@@ -51,9 +57,10 @@ public class PublicCadastroCoordenadorService {
                         .build());
     }
 
+    @Transactional(readOnly = true)
     public CoordenadorVerificacaoModel verificarTitularidade(VerificarTitularidadeInput input) {
         String cpf = exigirCpfValido(input.getCpf());
-        Coordenador coordenador = coordenadorRepository.findByCpf(cpf)
+        Coordenador coordenador = coordenadorRepository.findByCpfComLocais(cpf)
                 .orElseThrow(() -> new NegocioException("Não existe cadastro para este CPF"));
         String token = titularidadeStore.confirmarCodigo(cpf, input.getCodigo(), coordenador.getId());
         return CoordenadorVerificacaoModel.builder()
@@ -70,10 +77,12 @@ public class PublicCadastroCoordenadorService {
             throw new NegocioException(
                     "Já existe cadastro para este CPF. Confirme sua identidade para atualizar os dados.");
         }
-        coordenadorVagasService.bloquearEValidarVaga(input.getLocalVotacaoCodigo(), null);
+        coordenadorVagasService.bloquearEValidarVaga(input.getLocalTrabalhoCodigo(), null);
         Coordenador entidade = new Coordenador();
         cadastroCoordenadorService.aplicarVinculos(entidade, input);
-        return toPublico(coordenadorRepository.save(entidade));
+        CoordenadorPublicoModel criado = toPublico(coordenadorRepository.save(entidade));
+        vinculosCoordenadorEventos.notificar();
+        return criado;
     }
 
     @Transactional
@@ -84,10 +93,10 @@ public class PublicCadastroCoordenadorService {
         if (!sessao.cpf().equals(entidade.getCpf())) {
             throw new NegocioException("Confirme sua identidade novamente para atualizar o cadastro");
         }
-        UUID localAtual = entidade.getLocalVotacao().getCodigo();
-        boolean mudouLocal = !localAtual.equals(input.getLocalVotacaoCodigo());
-        if (mudouLocal) {
-            coordenadorVagasService.bloquearEValidarVaga(input.getLocalVotacaoCodigo(), entidade.getId());
+        UUID localTrabalhoAtual = entidade.getLocalTrabalho().getCodigo();
+        boolean mudouLocalTrabalho = !localTrabalhoAtual.equals(input.getLocalTrabalhoCodigo());
+        if (mudouLocalTrabalho) {
+            coordenadorVagasService.bloquearEValidarVaga(input.getLocalTrabalhoCodigo(), entidade.getId());
         }
         CoordenadorInput dados = new CoordenadorInput();
         dados.setNome(input.getNome());
@@ -98,7 +107,9 @@ public class PublicCadastroCoordenadorService {
         dados.setLocalVotacaoCodigo(input.getLocalVotacaoCodigo());
         CoordenadorRegras.validar(dados);
         cadastroCoordenadorService.aplicarVinculos(entidade, dados);
-        return toPublico(coordenadorRepository.save(entidade));
+        CoordenadorPublicoModel atualizado = toPublico(coordenadorRepository.save(entidade));
+        vinculosCoordenadorEventos.notificar();
+        return atualizado;
     }
 
     private CoordenadorCpfConsultaModel iniciarDesafio(Coordenador coordenador) {
@@ -106,13 +117,19 @@ public class PublicCadastroCoordenadorService {
             throw new NegocioException("Este cadastro não possui e-mail. Procure a coordenação para atualizar.");
         }
         String codigo = titularidadeStore.gerarCodigo(coordenador.getCpf());
-        envioEmailService.enviar(EnvioEmailService.Mensagem.builder()
-                .assunto("Código de verificação — Cadastro de coordenador")
-                .corpo("coordenador-codigo-verificacao.html")
-                .variavel("nome", coordenador.getNome())
-                .variavel("codigo", codigo)
-                .destinatario(coordenador.getEmail())
-                .build());
+        try {
+            envioEmailService.enviar(EnvioEmailService.Mensagem.builder()
+                    .assunto("Código de verificação — Cadastro de coordenador")
+                    .corpo("coordenador-codigo-verificacao.html")
+                    .variavel("nome", coordenador.getNome())
+                    .variavel("codigo", codigo)
+                    .variavel("urlCadastro", urlCadastroPublico())
+                    .destinatario(coordenador.getEmail())
+                    .build());
+        } catch (EmailException e) {
+            throw new NegocioException(
+                    "Não foi possível enviar o código de verificação. Tente novamente em instantes.");
+        }
         return CoordenadorCpfConsultaModel.builder()
                 .existe(true)
                 .contatoMascarado(mascararEmail(coordenador.getEmail()))
@@ -144,6 +161,14 @@ public class PublicCadastroCoordenadorService {
                 .localTrabalhoCodigo(coordenador.getLocalTrabalho() == null ? null : coordenador.getLocalTrabalho().getCodigo())
                 .localVotacaoCodigo(coordenador.getLocalVotacao() == null ? null : coordenador.getLocalVotacao().getCodigo())
                 .build();
+    }
+
+    private String urlCadastroPublico() {
+        String base = frontendBaseUrl == null ? "http://localhost:3000" : frontendBaseUrl.trim();
+        if (base.endsWith("/")) {
+            base = base.substring(0, base.length() - 1);
+        }
+        return base + "/cadastro-coordenador";
     }
 
     private static String exigirCpfValido(String cpfInformado) {

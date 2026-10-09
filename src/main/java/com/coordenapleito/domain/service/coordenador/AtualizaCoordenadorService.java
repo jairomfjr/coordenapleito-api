@@ -17,18 +17,21 @@ public class AtualizaCoordenadorService {
     private final GetCoordenadorService getCoordenadorService;
     private final CadastroCoordenadorService cadastroCoordenadorService;
     private final CoordenadorVagasService coordenadorVagasService;
+    private final VinculosCoordenadorEventos vinculosCoordenadorEventos;
 
     @Transactional
     public Coordenador atualizar(UUID codigo, CoordenadorInput input) {
         CoordenadorRegras.validar(input);
         Coordenador entidade = getCoordenadorService.findByCode(codigo);
-        boolean mudouLocal = entidade.getLocalVotacao() == null
-                || !entidade.getLocalVotacao().getCodigo().equals(input.getLocalVotacaoCodigo());
-        if (mudouLocal) {
-            coordenadorVagasService.bloquearEValidarVaga(input.getLocalVotacaoCodigo(), entidade.getId());
+        boolean mudouLocalTrabalho = entidade.getLocalTrabalho() == null
+                || !entidade.getLocalTrabalho().getCodigo().equals(input.getLocalTrabalhoCodigo());
+        if (mudouLocalTrabalho) {
+            coordenadorVagasService.bloquearEValidarVaga(input.getLocalTrabalhoCodigo(), entidade.getId());
         }
         cadastroCoordenadorService.aplicarVinculos(entidade, input);
         cadastroCoordenadorService.garantirCpfUnico(entidade.getCpf(), entidade.getId());
-        return coordenadorRepository.save(entidade);
+        Coordenador salvo = coordenadorRepository.save(entidade);
+        vinculosCoordenadorEventos.notificar();
+        return salvo;
     }
 }

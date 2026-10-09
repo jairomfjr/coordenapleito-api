@@ -3,6 +3,7 @@ package com.coordenapleito.domain.service.localvotacao;
 import com.coordenapleito.domain.exception.EntidadeEmUsoException;
 import com.coordenapleito.domain.model.LocalVotacao;
 import com.coordenapleito.domain.repository.LocalVotacaoRepository;
+import com.coordenapleito.domain.service.coordenador.VinculosCoordenadorEventos;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ public class DeletaLocalVotacaoService {
 
     private final LocalVotacaoRepository localVotacaoRepository;
     private final GetLocalVotacaoService getLocalVotacaoService;
+    private final VinculosCoordenadorEventos vinculosCoordenadorEventos;
 
     @Transactional
     public void deletar(UUID codigo) {
@@ -23,6 +25,7 @@ public class DeletaLocalVotacaoService {
         try {
             localVotacaoRepository.delete(entidade);
             localVotacaoRepository.flush();
+            vinculosCoordenadorEventos.notificar();
         } catch (DataIntegrityViolationException e) {
             throw new EntidadeEmUsoException(
                     "Não é possível excluir o local de votação pois ele está em uso");

@@ -393,6 +393,7 @@ public final class Permissoes {
         public static final String MENU = "inicio.menu";
         public static final String PAGINA = "inicio.pagina";
         public static final String VISUALIZAR = "inicio.visualizar";
+        public static final String GRAFICOS_COORDENADORES = "inicio.graficos-coordenadores";
     }
 
     public static final class InclusaoSocial {

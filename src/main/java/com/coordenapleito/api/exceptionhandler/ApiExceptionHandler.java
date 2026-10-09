@@ -8,6 +8,7 @@ import com.coordenapleito.core.security.UsuarioSecurityMessages;
 import com.coordenapleito.domain.exception.EntidadeEmUsoException;
 import com.coordenapleito.domain.exception.EntidadeNaoEncontradaException;
 import com.coordenapleito.domain.exception.NegocioException;
+import com.coordenapleito.infrastructure.service.email.EmailException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.hibernate.LazyInitializationException;
@@ -379,6 +380,21 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
         Problem problem = createProblemBuilder(status, problemType, detail)
                 .userMessage(detail).build();
+
+        return handleExceptionInternal(ex, problem, new HttpHeaders(), status, request);
+    }
+
+    @ExceptionHandler(EmailException.class)
+    public ResponseEntity<?> handleEmail(EmailException ex, WebRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        ProblemType problemType = ProblemType.ERRO_NEGOCIO;
+        String detail = "Não foi possível enviar o e-mail. Tente novamente em instantes.";
+
+        log.warn("Falha ao enviar e-mail: {}", ex.getMessage());
+
+        Problem problem = createProblemBuilder(status, problemType, detail)
+                .userMessage(detail)
+                .build();
 
         return handleExceptionInternal(ex, problem, new HttpHeaders(), status, request);
     }

@@ -4,8 +4,6 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.stereotype.Service;
-
 import com.coordenapleito.core.email.EmailProperties;
 import com.coordenapleito.domain.service.EnvioEmailService;
 
@@ -15,7 +13,6 @@ import org.springframework.core.io.ClassPathResource;
 
 import java.io.File;
 
-@Service
 public class SmtpEnvioEmailService implements EnvioEmailService {
 
     @Autowired
@@ -45,7 +42,10 @@ public class SmtpEnvioEmailService implements EnvioEmailService {
         helper.setSubject(mensagem.getAssunto());
         helper.setText(processadorEmailTemplate.processar(mensagem), true);
 
-        helper.addInline("logoCoordenapleito", new ClassPathResource("images/logo-coordenapleito.png"));
+        ClassPathResource logo = new ClassPathResource("images/logo-coordenapleito.png");
+        if (logo.exists()) {
+            helper.addInline("logoCoordenapleito", logo);
+        }
 
         if (mensagem.getAnexos() != null && mensagem.getAnexos().size() > 0)
             for (File a : mensagem.getAnexos()) {

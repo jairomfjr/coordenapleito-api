@@ -4,9 +4,11 @@ services:
     container_name: coordenapleito-api
     network_mode: net_sps
     ports:
-      - :8080
+      - "8083:8083"
     restart: always
     image: hub.sps.ce.gov.br/coordenapleito/coordenapleito-api
     environment:
       SPRING_PROFILES_ACTIVE: production
+      SERVER_PORT: 8083
+      APP_FRONTEND_BASE_URL: ${APP_FRONTEND_BASE_URL:-https://coordenapleito.sps.ce.gov.br}
       APP_INTEGRACAO_VAPT_VUPT_WEBHOOK_TOKEN: 364c98e3938417f45287985b126ca0c947c1163ce34842a0248dff645c9dedcf

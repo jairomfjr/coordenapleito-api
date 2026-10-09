@@ -16,6 +16,7 @@ public class DeletaCoordenadorService {
 
     private final CoordenadorRepository coordenadorRepository;
     private final GetCoordenadorService getCoordenadorService;
+    private final VinculosCoordenadorEventos vinculosCoordenadorEventos;
 
     @Transactional
     public void deletar(UUID codigo) {
@@ -23,6 +24,7 @@ public class DeletaCoordenadorService {
         try {
             coordenadorRepository.delete(entidade);
             coordenadorRepository.flush();
+            vinculosCoordenadorEventos.notificar();
         } catch (DataIntegrityViolationException e) {
             throw new EntidadeEmUsoException(
                     "Não é possível excluir o coordenador pois ele está em uso");

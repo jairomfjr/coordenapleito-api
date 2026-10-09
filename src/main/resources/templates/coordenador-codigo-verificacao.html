@@ -1,14 +1,25 @@
-<!doctype html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Código de verificação</title>
-</head>
-<body style="font-family: Kanit, Segoe UI, sans-serif; color: #1e293b; line-height: 1.5;">
-  <p>Olá <strong>${nome}</strong>,</p>
-  <p>Use o código abaixo para confirmar sua identidade e atualizar o cadastro de coordenador no Coordenapleito:</p>
-  <p style="font-size: 28px; font-weight: 700; letter-spacing: 0.12em; color: #e31c23;">${codigo}</p>
-  <p>O código expira em 10 minutos. Se você não solicitou esta verificação, ignore este e-mail.</p>
-  <p style="color: #64748b; font-size: 12px;">E-mail automático. Não responda.</p>
-</body>
-</html>
+<#assign tituloEmail = "Código de verificação">
+<#include "email-cabecalho.html">
+<p style="margin:0 0 16px;">Olá <strong>${nome}</strong>,</p>
+<p style="margin:0 0 20px;">Use o código abaixo para confirmar sua identidade e atualizar o cadastro de coordenador:</p>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 20px;">
+  <tr>
+    <td align="center" style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:18px 12px;font-size:32px;font-weight:700;letter-spacing:0.18em;color:#e31c23;">
+      ${codigo}
+    </td>
+  </tr>
+</table>
+<p style="margin:0 0 20px;">O código expira em 10 minutos. Se você não solicitou esta verificação, ignore este e-mail.</p>
+<#if urlCadastro??>
+<table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 0 8px;">
+  <tr>
+    <td style="border-radius:10px;background:#e31c23;">
+      <a href="${urlCadastro}" target="_blank" style="display:inline-block;padding:12px 22px;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;">
+        Reenviar código
+      </a>
+    </td>
+  </tr>
+</table>
+<p style="margin:16px 0 0;font-size:13px;color:#6b7280;">Se não recebeu o código, abra o cadastro e toque em <strong>Reenviar código</strong>.</p>
+</#if>
+<#include "email-rodape.html">

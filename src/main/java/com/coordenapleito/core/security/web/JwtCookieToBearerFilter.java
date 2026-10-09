@@ -34,6 +34,19 @@ public class JwtCookieToBearerFilter extends OncePerRequestFilter {
         return uri != null && uri.contains("/publico/");
     }
 
+    /**
+     * Tomcat só faz upgrade se o {@code HttpServletRequest} original chegar ao handshake.
+     * Envolver com {@link JwtCookieBearerRequestWrapper} impede o 101 e o dashboard não atualiza.
+     */
+    private static boolean isWebSocketHandshake(HttpServletRequest request) {
+        String upgrade = request.getHeader("Upgrade");
+        if (upgrade != null && upgrade.equalsIgnoreCase("websocket")) {
+            return true;
+        }
+        String uri = request.getRequestURI();
+        return uri != null && uri.contains("/ws/");
+    }
+
     private static boolean isPublicAuthEndpoint(HttpServletRequest request) {
         String uri = request.getRequestURI();
         if (uri == null) {
@@ -71,7 +84,7 @@ public class JwtCookieToBearerFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-        if (isPublicoRequest(request)) {
+        if (isPublicoRequest(request) || isWebSocketHandshake(request)) {
             filterChain.doFilter(request, response);
             return;
         }

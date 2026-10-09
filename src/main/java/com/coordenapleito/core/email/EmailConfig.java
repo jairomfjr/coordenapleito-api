@@ -2,12 +2,14 @@ package com.coordenapleito.core.email;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import com.coordenapleito.domain.service.EnvioEmailService;
 import com.coordenapleito.infrastructure.service.email.FakeEnvioEmailService;
 import com.coordenapleito.infrastructure.service.email.SandboxEnvioEmailService;
 import com.coordenapleito.infrastructure.service.email.SmtpEnvioEmailService;
 
+@Configuration
 public class EmailConfig {
 
     @Autowired

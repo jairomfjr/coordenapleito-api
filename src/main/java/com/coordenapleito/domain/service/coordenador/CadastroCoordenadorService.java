@@ -17,15 +17,18 @@ public class CadastroCoordenadorService {
     private final CoordenadorRepository coordenadorRepository;
     private final GetLocalVotacaoService getLocalVotacaoService;
     private final CoordenadorVagasService coordenadorVagasService;
+    private final VinculosCoordenadorEventos vinculosCoordenadorEventos;
 
     @Transactional
     public Coordenador salvar(CoordenadorInput input) {
         CoordenadorRegras.validar(input);
-        coordenadorVagasService.bloquearEValidarVaga(input.getLocalVotacaoCodigo(), null);
+        coordenadorVagasService.bloquearEValidarVaga(input.getLocalTrabalhoCodigo(), null);
         Coordenador entidade = new Coordenador();
         aplicarVinculos(entidade, input);
         garantirCpfUnico(entidade.getCpf(), null);
-        return coordenadorRepository.save(entidade);
+        Coordenador salvo = coordenadorRepository.save(entidade);
+        vinculosCoordenadorEventos.notificar();
+        return salvo;
     }
 
     void aplicarVinculos(Coordenador entidade, CoordenadorInput input) {

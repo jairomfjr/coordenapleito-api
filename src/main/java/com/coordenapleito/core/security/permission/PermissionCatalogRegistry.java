@@ -24,6 +24,13 @@ public final class PermissionCatalogRegistry {
         int order = 0;
 
         readOnlyUi(list, "geral", "inicio", "Página inicial", order);
+        list.add(def(
+                "inicio.graficos-coordenadores",
+                "geral",
+                "inicio",
+                "graficos-coordenadores",
+                "Gráficos de coordenadores na página inicial",
+                4));
         order += 20;
 
         crudUi(list, "administracao", "usuario", "Usuários", order);
@@ -46,14 +53,10 @@ public final class PermissionCatalogRegistry {
         order += 10;
         crudUi(list, "pleito", "coordenador", "Coordenadores", order);
         order += 20;
+        readOnlyUi(list, "relatorios", "relatorio", "Relatórios", order);
+        order += 20;
+        list.add(def("relatorio.gerar", "relatorios", "relatorio", "gerar", "Gerar PDF — Relatórios", order++));
         list.add(def("usuario.alterar-senha", "administracao", "usuario", "alterar-senha", "Alterar senha de usuário", order++));
-        list.add(def(
-                "relatorio-dashboard.gerar-qualificacao",
-                "relatorios",
-                "relatorio-dashboard",
-                "gerar-qualificacao",
-                "Gerar PDF — Dashboard Qualificação",
-                order++));
 
         return list;
     }

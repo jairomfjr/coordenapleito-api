@@ -5,6 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 
@@ -20,13 +22,21 @@ public interface CoordenadorRepository extends CustomJpaRepository<Coordenador, 
     @EntityGraph(attributePaths = {"localTrabalho", "localVotacao"})
     Optional<Coordenador> findByCpf(String cpf);
 
+    @Query("""
+            select c from Coordenador c
+            join fetch c.localTrabalho
+            join fetch c.localVotacao
+            where c.cpf = :cpf
+            """)
+    Optional<Coordenador> findByCpfComLocais(@Param("cpf") String cpf);
+
     boolean existsByCpf(String cpf);
 
     boolean existsByCpfAndIdNot(String cpf, Long id);
 
-    long countByLocalVotacaoId(Long localVotacaoId);
+    long countByLocalTrabalhoId(Long localTrabalhoId);
 
-    long countByLocalVotacaoIdAndIdNot(Long localVotacaoId, Long id);
+    long countByLocalTrabalhoIdAndIdNot(Long localTrabalhoId, Long id);
 
     @Override
     @EntityGraph(attributePaths = {"localTrabalho", "localVotacao"})
